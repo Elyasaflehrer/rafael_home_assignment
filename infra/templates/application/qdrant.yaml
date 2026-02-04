@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: qdrant
+  namespace: argocd
+spec:
+  destination:
+    namespace: qdrant
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: qdrant
+    repoURL: https://qdrant.github.io/qdrant-helm
+    targetRevision: 1.16.3
+    helm:
+      values: |
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+          requests:
+            cpu: 100m
+            memory: 128Mi
+  syncPolicy:
+    automated:
+      enabled: true
+    syncOptions:
+    - CreateNamespace=true

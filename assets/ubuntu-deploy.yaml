@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ubuntu-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ubuntu
+  template:
+    metadata:
+      labels:
+        app: ubuntu
+    spec:
+      containers:
+        - name: ubuntu
+          image: ubuntu:22.04
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              apt update && \
+              apt install -y git curl vim python3 python3-pip && \
+              git clone https://github.com/Elyasaflehrer/rafael_home_assignment.git -b dev/initial
+              sleep infinity
