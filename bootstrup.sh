@@ -7,6 +7,7 @@ INSTALL_KIND_CLI="false"
 KIND_CLI_PATH="/usr/local/bin"
 CREATE_LOCAL_REGISTRY=false
 REGISTRY_PORT=5001
+BUILD_IMAGE=false
 parse_args(){
   while [[ $# -gt 0 ]]; do
       arg="$1"
@@ -25,6 +26,10 @@ parse_args(){
               ;;
            --registry-port)
               REGISTRY_PORT="${arg#*=}"
+              shift 1
+              ;;
+           --build-image)
+              BUILD_IMAGE="${arg#*=}"
               shift 1
               ;;
            --kind-cli-path)
@@ -55,11 +60,12 @@ function show_help() {
     echo "Usage: $0 [options]"
     echo
     echo "Options:"
-    echo "  --install-kind-cli <value>   installe kind cli (Default false, only true install)"
+    echo "  --install-kind-cli <value>   Installe kind cli (Default false, only true install)"
     echo "  --cluster-name <name>        Specify the cluster name (Default kind)"
-    echo "  --create-local-registry      create local-registy (Default false)"
+    echo "  --create-local-registry      Create local-registy (Default false)"
     echo "  --registry-port              Specify the local-registry port (Default 5001)"
-    echo "  --argocd <value>             installe ArgoCD (Default true, type false to uninstall)"
+    echo "  --build-image                Build and push image to local-registry, image name ask_docs:latest (Default false)"
+    echo "  --argocd <value>             Installe ArgoCD (Default true, type false to uninstall)"
     echo "  -h, --help                   Show this help message"
     echo
 }
@@ -168,9 +174,6 @@ function create-local-registry(){
     docker run \
       -d --restart=always -p "127.0.0.1:${REGISTRY_PORT}:5000" --network bridge --name "${reg_name}" \
       registry:2
-    else
-      echo "Local-registry already set"
-      return
   fi
 
   for node in $(kind get nodes); do
@@ -196,6 +199,11 @@ data:
 EOF
 }
 
+function build-and-push-image(){
+  docker build -t ask_docs -f ask_docs/Dockerfile ask_docs
+  docker tag ask_docs:latest localhost:${REGISTRY_PORT}/ask_docs:latest
+  docker push localhost:${REGISTRY_PORT}/ask_docs:latest
+}
 
 parse_args "$@"
 
@@ -212,6 +220,10 @@ install_kind_cluster
 if [[ "$CREATE_LOCAL_REGISTRY" == "true" ]]; then
   echo "creating local-registry"
   create-local-registry
+fi
+if [[ "$BUILD_IMAGE" == "true" ]]; then
+  echo "build and push image"
+  build-and-push-image
 fi
 
 if [[ "$ARGOCD" == "true" ]]; then

@@ -1,8 +1,8 @@
 replicaCount: 1
 
 image:
-  repository: elyasaflehrer/rafeal-app
-  tag: 
+  repository: localhost:5001/ask_docs
+  tag: latest
   pullPolicy: Always
 
 livenessProbe:
