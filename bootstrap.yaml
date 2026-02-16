@@ -1,0 +1,29 @@
+apiVersion: v1
+data:
+  project: ZGVmYXVsdA==
+  type: Z2l0
+  url: aHR0cHM6Ly9naXRodWIuY29tL0VseWFzYWZsZWhyZXIvcmFmYWVsX2hvbWVfYXNzaWdubWVudC5naXQ=
+kind: Secret
+metadata:
+  labels:
+    argocd.argoproj.io/secret-type: repository
+  name: main-repo
+  namespace: argocd
+type: Opaque
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: infra
+  namespace: argocd
+spec:
+  destination:
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: infra
+    repoURL: https://github.com/Elyasaflehrer/rafael_home_assignment.git
+    targetRevision: dev/initial
+  syncPolicy:
+    automated:
+      enabled: true
